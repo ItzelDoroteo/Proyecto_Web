@@ -7,7 +7,6 @@ Este proyecto es una **Progressive Web App (PWA)** diseñada para mejorar la ges
 ### Características principales
 - **Login**: Acceso seguro para usuarios registrados.
 - **Carrito de compras**: Gestión de productos seleccionados por el usuario.
-- **Inventario**: Visualización y actualización del stock de productos.
 - **Perfil de usuario**: Configuración y personalización de la cuenta del usuario.
 - **Soporte offline**: Visualización de catálogo y otras funcionalidades básicas sin conexión a internet.
 - **Notificaciones push**: Informaciones importantes enviadas directamente al dispositivo del usuario.
@@ -17,12 +16,12 @@ Sigue los siguientes pasos para clonar e instalar el proyecto localmente:
 
 1. Clonar el repositorio:
    ```bash
-   git clone https://github.com/usuario/proyecto-pwa.git
+   git clone https://github.com/ItzelDoroteo/Proyecto_Web.git
    ```
 
 2. Navegar al directorio del proyecto:
    ```bash
-   cd proyecto-pwa
+   cd Proyecto_Web
    ```
 
 3. Instalar las dependencias:
@@ -35,7 +34,7 @@ Sigue los siguientes pasos para clonar e instalar el proyecto localmente:
 
 5. Ejecutar el proyecto en modo desarrollo:
    ```bash
-   npm start
+   npm run start
    ```
 
 ### Uso

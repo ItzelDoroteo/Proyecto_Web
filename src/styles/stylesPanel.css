@@ -1,0 +1,60 @@
+/* styles.css */
+
+.accessibility-panel {
+    margin-top: 70px;
+    border-radius: 5px;
+    position: fixed;
+    top: 1;
+    left: 0;
+    height: 30%;
+    background-color: rgb(15, 167, 197);
+    color: #fff;
+    box-sizing: border-box;
+    z-index: 1000;
+    transition: width 0.3s ease; /* Transición suave para el cambio de ancho */
+  }
+  
+  .accessibility-panel.expanded {
+    z-index: 1000; /* Asegura que la barra se superponga a otros elementos cuando está expandida */
+  }
+  
+  .accessibility-panel button {
+    display: block;
+    width: 100%;
+    padding: 5px;
+    background-color: #555;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+
+  .accessibility-panel.expanded button {
+    margin-bottom: 10px;
+  }
+  
+  .accessibility-panel button:hover {
+    background-color: #777;
+  }
+  
+  /* Estilo específico para el botón de expansión */
+  .expand-button {
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Estilos para el formulario de nivel de zoom */
+  label {
+    display: block;
+    margin-top: 10px;
+    color: #fff;
+  }
+  
+  input {
+    width: 50px;
+    padding: 5px;
+  }
+  

@@ -6,11 +6,14 @@ const AlertContext = createContext();
 
 export const useAlert = () => useContext(AlertContext);
 
-export const AlertProvider = ({ children }) => {
+export const AlertProvider = ({ children, mockShowAlert }) => {
   const toast = useRef(null);
 
   const showAlert = (severity, message, life = 3000) => {
-    if (toast.current) {
+    if (mockShowAlert) {
+      // Si mockShowAlert está definido, lo usamos para las pruebas
+      mockShowAlert(severity, message, life);
+    } else if (toast.current) {
       toast.current.show({
         severity,
         summary: severity.charAt(0).toUpperCase() + severity.slice(1),

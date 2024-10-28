@@ -4,12 +4,32 @@ on:
   push:
     branches:
       - JoseLuisDev
+      - ItzelDev
   pull_request:
     branches:
       - main
 
 jobs:
-  build:
+
+  outdated-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Check for outdated dependencies
+        run: npm outdated
+        continue-on-error: true
+
+  build-react-test:
     runs-on: ubuntu-latest
 
     steps:

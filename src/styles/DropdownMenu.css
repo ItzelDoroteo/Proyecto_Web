@@ -1,0 +1,47 @@
+/* DropdownMenu.css */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+button {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.dropdown-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  width: 170px;
+    font-size: 18px;
+}
+
+.dropdown-list.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.dropdown-list li {
+  padding: 10px;
+  border-bottom: 1px solid #f8c6f9;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.dropdown-list li:hover {
+  background-color: #f4e0f4e6;
+}
+
+.dropdown-list li:last-child {
+  border-bottom: none;
+}

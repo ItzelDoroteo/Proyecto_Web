@@ -133,11 +133,11 @@ const SelectAddress = () => {
         (total, item) => total + item.precioFinal * item.cantidad,
         0
       ) + parseFloat(envio)
-    ).toFixed(2), // Total a pagar
+    ), // Total a pagar
     totalProductos: Object.values(cart)
       .reduce((total, item) => total + item.precioFinal * item.cantidad, 0)
       .toFixed(2), // Total de productos
-    totalEnvio: parseFloat(envio).toFixed(2), // Total del envío
+    totalEnvio: envio, // Total del envío
     totalIVA: totalIVA.toFixed(2), // Total del IVA
     sucursalesId: sucursalSeleccionada ? selectedSucursalId : null,
     domicilioId: direccionSeleccionada ? selectedDomicilioId : null,

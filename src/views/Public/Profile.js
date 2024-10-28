@@ -8,7 +8,7 @@ import { FileUpload } from "primereact/fileupload";
 import { useAlert } from "../../context/AlertContext";
 
 const Profile = () => {
-  const { token } = useAuth();  
+  const { token } = useAuth();
   const fileUploadRef = useRef(null);
   const [uploadedImage, setUploadedImage] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null); // Para almacenar la imagen capturada
@@ -57,7 +57,10 @@ const Profile = () => {
     let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
     const mesActual = hoy.getMonth();
     const mesNacimiento = fechaNacimiento.getMonth();
-    if (mesActual < mesNacimiento || (mesActual === mesNacimiento && hoy.getDate() < fechaNacimiento.getDate())) {
+    if (
+      mesActual < mesNacimiento ||
+      (mesActual === mesNacimiento && hoy.getDate() < fechaNacimiento.getDate())
+    ) {
       edad--;
     }
     return edad;
@@ -113,10 +116,16 @@ const Profile = () => {
   // Función para capturar la imagen
   const captureImage = () => {
     const context = canvasRef.current.getContext("2d");
-    context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
+    context.drawImage(
+      videoRef.current,
+      0,
+      0,
+      canvasRef.current.width,
+      canvasRef.current.height
+    );
     const image = canvasRef.current.toDataURL("image/png");
     setCapturedImage(image);
-    videoRef.current.srcObject.getTracks().forEach(track => track.stop()); // Detener la cámara
+    videoRef.current.srcObject.getTracks().forEach((track) => track.stop()); // Detener la cámara
     setCameraEnabled(false);
   };
 
@@ -149,12 +158,11 @@ const Profile = () => {
               ) : (
                 <img
                   src={
-                    customer.imagen !== null 
-                    && customer.imagen !== ''
+                    customer.imagen !== null && customer.imagen !== ""
                       ? customer.imagen
-                      : (selectedSexo === "masculino"
+                      : selectedSexo === "masculino"
                       ? "/images/user-masculino.png"
-                      : "/images/OIP (1).jpg")
+                      : "/images/OIP (1).jpg"
                   }
                   className="img-fluid mt-2"
                   alt="Chucherias & Regalos"
@@ -174,20 +182,114 @@ const Profile = () => {
               />
 
               <div className="mt-4">
-                <button className="btn-primary" onClick={enableCamera}>Abrir cámara</button>
+                <button className="btn-primary" onClick={enableCamera}>
+                  Abrir cámara
+                </button>
               </div>
 
               {cameraEnabled && (
                 <div className="camera-container mt-4">
-                  <video ref={videoRef} style={{ width: "100%", height: "auto", border: "2px solid black" }}></video>
-                  <button className="btn-primary mt-2" onClick={captureImage}>Tomar foto</button>
-                  <canvas ref={canvasRef} style={{ display: "none" }} width="640" height="480"></canvas>
+                  <video
+                    ref={videoRef}
+                    style={{
+                      width: "100%",
+                      height: "auto",
+                      border: "2px solid black",
+                    }}
+                  ></video>
+                  <button className="btn-primary mt-2" onClick={captureImage}>
+                    Tomar foto
+                  </button>
+                  <canvas
+                    ref={canvasRef}
+                    style={{ display: "none" }}
+                    width="640"
+                    height="480"
+                  ></canvas>
                 </div>
               )}
             </div>
 
             <div className="col-md-7 mt-2">
-              {/* Datos del usuario */}
+              <h3 className="fw-bold">Datos de la cuenta</h3>
+              <div className="form-group mb-4 mt-2 col-sm-12">
+                <label htmlFor="Name" className="fw-bold">
+                  Nombre completo
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="Name"
+                  placeholder="Nombre y apellidos"
+                  value={`${customer.nombre} ${customer.aPaterno} ${customer.aMaterno}`}
+                  readOnly
+                />
+              </div>
+              <div className="form-group mb-4 col-sm-12">
+                <label htmlFor="Email" className="fw-bold">
+                  Email
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="Email"
+                  placeholder="Email"
+                  value={`${customer.correo}`}
+                  readOnly
+                />
+              </div>
+              <div className="form-group mb-4 row">
+                <div className="form-group col-sm-6">
+                  <label htmlFor="Telefono" className="fw-bold">
+                    Telefono
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="Telefono"
+                    placeholder="Telefono"
+                    value={`${customer.telefono}`}
+                    readOnly
+                  />
+                </div>
+                <div className="form-group mb-4 row">
+                  <div className="form-group col-sm-7">
+                    <label htmlFor="Sexo" className="fw-bold">
+                      Sexo
+                    </label>
+                    <select
+                      className="form-control"
+                      id="Sexo"
+                      value={selectedSexo}
+                      disabled
+                    >
+                      <option value="" disabled selected hidden>
+                        Selecciona tu sexo
+                      </option>
+                      <option value="masculino">Masculino</option>
+                      <option value="femenino">Femenino</option>
+                    </select>
+                  </div>
+                  <div className="form-group col-sm-5">
+                    <label htmlFor="Edad" className="fw-bold">
+                      Edad
+                    </label>
+                    <input
+                      type="number"
+                      className="form-control"
+                      id="Edad"
+                      placeholder="Edad"
+                      value={edad !== null ? edad : ""}
+                      readOnly
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="cont-btn mt-4">
+                <button className="btn-secondary" onClick={handleBack}>
+                  Regresar
+                </button>
+              </div>
             </div>
           </div>
         </div>

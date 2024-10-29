@@ -10,7 +10,6 @@ on:
       - main
 
 jobs:
-
   outdated-dependencies:
     runs-on: ubuntu-latest
     steps:
@@ -31,13 +30,13 @@ jobs:
 
   build-react-test:
     runs-on: ubuntu-latest
-
+    needs: outdated-dependencies  # Dependencia del trabajo anterior
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16'
 

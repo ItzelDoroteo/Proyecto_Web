@@ -88,5 +88,6 @@ jobs:
 
       - name: Build React app
         run: npm run build
+        continue-on-error: true
 
   

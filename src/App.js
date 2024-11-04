@@ -6,6 +6,7 @@ import EmployRoutes from "./routes/EmployRoutes";
 import { AuthProvider } from "./context/AuthContext";
 import { PrimeReactProvider } from "primereact/api";
 import { AlertProvider } from "./context/AlertContext";
+import { requestNotificationPermission } from "./firebaseMessaging";
 import "primereact/resources/themes/lara-light-cyan/theme.css";
 import "primereact/resources/primereact.min.css";
 
@@ -16,6 +17,9 @@ import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   useEffect(() => {
+    // Solicita el permiso de notificación al cargar la aplicación
+    requestNotificationPermission();
+
     // Agregar el script de integración de UserWay
     const userwayScript = document.createElement("script");
     userwayScript.src = "https://cdn.userway.org/widget.js";

@@ -1,0 +1,93 @@
+name: CI
+
+on: 
+  push:
+    branches:
+      - JoseLuisDev
+      - ItzelDev
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  outdated-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Check for outdated dependencies
+        run: npm outdated
+        continue-on-error: true
+
+  build-react-test:
+    runs-on: ubuntu-latest
+    needs: outdated-dependencies  # Dependencia del trabajo anterior
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+  run-cypress-tests:
+    runs-on: ubuntu-latest
+    needs: build-react-test  # Dependencia del trabajo de construcción de la app
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start application
+        run: npm start &  # Inicia la aplicación en segundo plano
+
+      - name: Wait for the application to be ready
+        run: npx wait-on http://localhost:3000  # Cambia el puerto si es necesario
+
+      - name: Run Cypress tests
+        run: npx cypress run
+
+
+  build-react-app:
+    runs-on: ubuntu-latest
+    needs: run-cypress-tests  # Dependencia del trabajo de pruebas
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build React app
+        run: npm run build
+        continue-on-error: true
+
+  

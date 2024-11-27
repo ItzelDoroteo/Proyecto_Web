@@ -216,6 +216,7 @@ const ModalComponent = ({ show, onClose }) => {
                 </div>
                 <div className="form-group mt-4">
                   <ReCAPTCHA
+                    data-testid="recaptcha"
                     sitekey="6LcbDGApAAAAANIKHKiUNtO-2ae77SgnoFzKXlO-"
                     onChange={handleChange}
                   />

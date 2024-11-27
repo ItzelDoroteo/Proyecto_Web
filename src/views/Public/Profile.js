@@ -4,26 +4,27 @@ import PageTitle from "../../components/Public/PageTitle";
 import { jwtDecode } from "jwt-decode";
 import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
-import { FileUpload } from "primereact/fileupload";
+import { ConfirmDialog } from "primereact/confirmdialog";
 import { useAlert } from "../../context/AlertContext";
+import { Button } from "primereact/button";
 
 const Profile = () => {
   const { token } = useAuth();
-  const fileUploadRef = useRef(null);
-  const [uploadedImage, setUploadedImage] = useState(null);
-  const [capturedImage, setCapturedImage] = useState(null); // Para almacenar la imagen capturada
-  const videoRef = useRef(null); // Referencia al video para la cámara
-  const canvasRef = useRef(null); // Referencia al canvas para tomar la foto
-  const [cameraEnabled, setCameraEnabled] = useState(false); // Estado para habilitar la cámara
   const showAlert = useAlert();
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [capturedImage, setCapturedImage] = useState(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const [cameraEnabled, setCameraEnabled] = useState(false);
   const [customer, setCustomer] = useState(null);
+  const fileUploadRef = useRef(null);
+  const navigate = useNavigate();
   const [selectedSexo, setSelectedSexo] = useState("");
   const [edad, setEdad] = useState(null);
 
-  const navigate = useNavigate();
-
   const handleBack = () => {
-    navigate(-1); // Regresa a la ruta anterior
+    navigate(-1);
   };
 
   useEffect(() => {
@@ -31,17 +32,13 @@ const Profile = () => {
       try {
         if (token) {
           const decoded = jwtDecode(token);
-
           setSelectedSexo(decoded.sexo);
           const fechaNacimiento = new Date(decoded.edad);
           const edadActual = calcularEdad(fechaNacimiento);
-
           const response = await axios.get(
-            `http://localhost:5000/users/${decoded.customerId}`
+            `https://backend-c-r-production.up.railway.app/users/${decoded.customerId}`
           );
-
           setCustomer(response.data);
-          setEdad(edadActual);
         }
       } catch (error) {
         console.error("Error al obtener el usuario", error);
@@ -66,73 +63,95 @@ const Profile = () => {
     return edad;
   };
 
-  // Función personalizada para manejar la carga de la imagen
-  const customBase64Uploader = async (event) => {
-    const file = event.files[0];
+  const customBase64Uploader = async (file) => {
     const formData = new FormData();
     formData.append("imagen", file);
 
     try {
       const response = await axios.put(
-        `http://localhost:5000/users/banner/${customer.customerId}`,
+        `https://backend-c-r-production.up.railway.app/users/banner/${customer.customerId}`,
         formData
       );
-
       if (response.status === 200) {
-        if (fileUploadRef.current) {
-          fileUploadRef.current.clear();
-        }
-        showAlert("success", "Imagen subida exitosamente");
         setUploadedImage(response.data.imagen);
+        showAlert("success", "Imagen actualizada exitosamente");
       } else {
-        console.error("Error al subir la imagen");
-        showAlert("error", "Error al subir la imagen");
+        showAlert("error", "Error al actualizar la imagen");
       }
     } catch (error) {
       console.error("Error:", error);
+      showAlert("error", "Error al cargar la imagen");
     }
   };
 
-  // useEffect para habilitar la cámara una vez que el videoRef esté disponible
-  useEffect(() => {
-    if (cameraEnabled && videoRef.current) {
-      navigator.mediaDevices
-        .getUserMedia({ video: true })
-        .then((stream) => {
-          videoRef.current.srcObject = stream;
-          videoRef.current.play();
-        })
-        .catch((err) => {
-          console.error("Error al acceder a la cámara:", err);
-        });
-    }
-  }, [cameraEnabled]);
-
-  // Función para habilitar la cámara
   const enableCamera = () => {
-    setCameraEnabled(true); // Esto habilitará la cámara en el useEffect
+    setCameraEnabled(true);
+    navigator.mediaDevices
+      .getUserMedia({ video: true })
+      .then((stream) => {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      })
+      .catch((err) => {
+        console.error("Error al acceder a la cámara:", err);
+      });
   };
 
-  // Función para capturar la imagen
   const captureImage = () => {
-    const context = canvasRef.current.getContext("2d");
-    context.drawImage(
-      videoRef.current,
-      0,
-      0,
-      canvasRef.current.width,
-      canvasRef.current.height
-    );
-    const image = canvasRef.current.toDataURL("image/png");
-    setCapturedImage(image);
-    videoRef.current.srcObject.getTracks().forEach((track) => track.stop()); // Detener la cámara
+    if (canvasRef.current && videoRef.current) {
+      const context = canvasRef.current.getContext("2d");
+      canvasRef.current.width = videoRef.current.videoWidth;
+      canvasRef.current.height = videoRef.current.videoHeight;
+      context.drawImage(
+        videoRef.current,
+        0,
+        0,
+        canvasRef.current.width,
+        canvasRef.current.height
+      );
+      const image = canvasRef.current.toDataURL("image/png");
+      customBase64Uploader(dataURLtoFile(image, "captured.png"));
+      videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
+      setCapturedImage(image);
+      setCameraEnabled(false);
+    }
+  };
+
+  const cancelCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
+    }
     setCameraEnabled(false);
+  };
+
+  const dataURLtoFile = (dataUrl, filename) => {
+    const arr = dataUrl.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  };
+
+  const handleImageUpdate = () => {
+    setShowConfirmDialog(true);
+  };
+
+  const handleDialogSelection = (action) => {
+    if (action === "upload") {
+      fileUploadRef.current.click();
+    } else if (action === "camera") {
+      enableCamera();
+    }
+    setShowConfirmDialog(false);
   };
 
   return (
     <div className="section row3 mt-4">
       <PageTitle title="Chucherias & Regalos | Perfil de usuario" />
-
       <h3 className="title-pag fw-bold text-uppercase">Información Personal</h3>
       <hr className="hr-primary" />
       {customer ? (
@@ -142,74 +161,72 @@ const Profile = () => {
               <h4 className="fw-bold">
                 {customer.nombre} {customer.aPaterno} {customer.aMaterno}
               </h4>
-
-              {uploadedImage ? (
+              {!cameraEnabled && (uploadedImage || capturedImage) ? (
                 <img
-                  src={uploadedImage}
+                  src={uploadedImage || capturedImage}
                   className="img-fluid mt-2"
-                  alt="Chucherias & Regalos"
-                />
-              ) : capturedImage ? (
-                <img
-                  src={capturedImage}
-                  className="img-fluid mt-2"
-                  alt="Imagen capturada"
+                  alt="Imagen de usuario"
                 />
               ) : (
-                <img
-                  src={
-                    customer.imagen !== null && customer.imagen !== ""
-                      ? customer.imagen
-                      : selectedSexo === "masculino"
-                      ? "/images/user-masculino.png"
-                      : "/images/OIP (1).jpg"
-                  }
-                  className="img-fluid mt-2"
-                  alt="Chucherias & Regalos"
+                !cameraEnabled && (
+                  <img
+                    src={customer.imagen || "/images/default-avatar.png"}
+                    className="img-fluid mt-2"
+                    alt="Imagen de usuario"
+                  />
+                )
+              )}
+              <input
+                type="file"
+                ref={fileUploadRef}
+                onChange={(e) => customBase64Uploader(e.target.files[0])}
+                style={{ display: "none" }}
+              />
+              {!cameraEnabled && (
+                <Button
+                  label="Actualizar imagen"
+                  severity="success"
+                  icon="pi pi-cloud-upload"
+                  onClick={handleImageUpdate}
+                  className="mt-2 mb-4"
+                  style={{ color: "white", borderRadius: 10 }}
                 />
               )}
 
-              <FileUpload
-                ref={fileUploadRef}
-                mode="basic"
-                name="imagen"
-                url={`http://localhost:5000/users/usuario/${customer.customerId}/imagen`}
-                accept="image/*"
-                customUpload
-                uploadHandler={customBase64Uploader}
-                chooseLabel="Selecciona una imagen"
-                className="mt-4"
-              />
-
-              <div className="mt-4">
-                <button className="btn-primary" onClick={enableCamera}>
-                  Abrir cámara
-                </button>
-              </div>
-
               {cameraEnabled && (
-                <div className="camera-container mt-4">
+                <div className="row mt-3 d-flex item-center">
                   <video
                     ref={videoRef}
-                    style={{
-                      width: "100%",
-                      height: "auto",
-                      border: "2px solid black",
-                    }}
+                    className="camera-view"
+                    autoPlay
                   ></video>
-                  <button className="btn-primary mt-2" onClick={captureImage}>
-                    Tomar foto
-                  </button>
                   <canvas
                     ref={canvasRef}
                     style={{ display: "none" }}
-                    width="640"
-                    height="480"
+                    width="360"
+                    height="360"
                   ></canvas>
+                  <div className="d-flex justify-content-between">
+                    <Button
+                      label="Cancelar"
+                      severity="secondary"
+                      icon="pi pi-times"
+                      onClick={cancelCamera}
+                      className="mt-2"
+                      style={{ color: "white", borderRadius: 10 }}
+                    />
+                    <Button
+                      label="Capturar imagen"
+                      severity="success"
+                      icon="pi pi-image"
+                      onClick={captureImage}
+                      className="mt-2"
+                      style={{ color: "white", borderRadius: 10 }}
+                    />
+                  </div>
                 </div>
               )}
             </div>
-
             <div className="col-md-7 mt-2">
               <h3 className="fw-bold">Datos de la cuenta</h3>
               <div className="form-group mb-4 mt-2 col-sm-12">
@@ -286,9 +303,14 @@ const Profile = () => {
                 </div>
               </div>
               <div className="cont-btn mt-4">
-                <button className="btn-secondary" onClick={handleBack}>
-                  Regresar
-                </button>
+                <Button
+                  label="Regresar"
+                  severity="secondary"
+                  icon="pi pi-arrow-left"
+                  onClick={handleBack}
+                  className="mt-2 mb-4"
+                  style={{ color: "white", borderRadius: 10 }}
+                />
               </div>
             </div>
           </div>
@@ -296,6 +318,18 @@ const Profile = () => {
       ) : (
         <p>No hay token disponible</p>
       )}
+
+      <ConfirmDialog
+        visible={showConfirmDialog}
+        onHide={() => setShowConfirmDialog(false)}
+        message="Seleccione el método para actualizar la imagen"
+        header="Actualizar imagen"
+        icon="pi pi-exclamation-triangle"
+        acceptLabel="Cargar desde dispositivo"
+        rejectLabel="Usar cámara"
+        accept={() => handleDialogSelection("upload")}
+        reject={() => handleDialogSelection("camera")}
+      />
     </div>
   );
 };
